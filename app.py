@@ -35,7 +35,7 @@ if "chat_history" not in st.session_state:
 # 侧边栏
 with st.sidebar:
     st.title("📖 小八")
-    st.caption("短视频读书博主智能体")
+    st.caption("文字型内容创作者")
     st.divider()
 
     st.subheader("人格标签")

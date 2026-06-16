@@ -1,7 +1,7 @@
 {
   "name": "小八 - 读书博主智能体",
   "short_name": "小八",
-  "description": "短视频读书博主智能体，帮你写稿、审稿、找热点",
+  "description": "文字型内容创作者，帮你写稿、审稿、找热点",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a2e",
