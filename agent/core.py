@@ -100,6 +100,55 @@ class BookBloggerAgent:
         """获取当前记忆"""
         return self.memory.copy()
 
+    def _extract_memory(self, user_input: str):
+        """从用户输入中自动提取值得记忆的信息。返回 (key, value) 或 None"""
+        hint_keywords = [
+            "喜欢", "爱", "我是", "我想", "我觉得", "不喜欢", "讨厌",
+            "偏好", "习惯", "常用", "擅长", "想要", "希望", "一般",
+            "通常", "主要", "专业", "工作", "职业", "风格", "细腻",
+            "深刻", "温柔", "犀利", "关注", "感兴趣", "最近在看",
+        ]
+        if not any(k in user_input for k in hint_keywords):
+            return None
+
+        try:
+            response = self.client.chat.completions.create(
+                model=get_llm_model(),
+                temperature=0.1,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "你是一位信息提取助手。从用户的话中提取值得长期记忆的个人偏好、"
+                            "身份特征或创作需求。只提取事实性信息，不要推测。"
+                            "如果没有值得记忆的信息，只回复'无'。格式要求：标签 = 内容"
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"用户说的话：\"{user_input}\"\n\n"
+                            "请提取值得记忆的信息。注意：\n"
+                            "- 只提取用户明确表达或强烈暗示的偏好/特征\n"
+                            "- 标签要简洁（2-6字），如'偏好作家''职业身份''风格偏好'\n"
+                            "- 内容要具体，不要抽象\n"
+                            "- 如果没有，回复\"无\""
+                        ),
+                    },
+                ],
+            )
+            result = response.choices[0].message.content.strip()
+            if result in ("无", "", None) or "=" not in result:
+                return None
+            key, value = result.split("=", 1)
+            key = key.strip().strip("\"'")
+            value = value.strip().strip("\"'")
+            if not key or not value or len(value) < 2:
+                return None
+            return key, value
+        except Exception:
+            return None
+
     def chat(self, user_input: str) -> str:
         """处理用户输入，支持记忆提取和多轮工具调用"""
         # 检查是否是记忆设置指令
@@ -121,6 +170,7 @@ class BookBloggerAgent:
         self.messages.append({"role": "user", "content": user_input})
 
         max_iterations = 5
+        reply = None
         for _ in range(max_iterations):
             if self.supports_tools:
                 reply = self._chat_with_tools()
@@ -128,16 +178,26 @@ class BookBloggerAgent:
                 reply = self._chat_without_tools()
 
             if reply is not None:
-                return reply
+                break
 
-        # fallback
-        response = self.client.chat.completions.create(
-            model=get_llm_model(),
-            temperature=LLM_TEMPERATURE,
-            messages=self.messages,
-        )
-        self.messages.append(response.choices[0].message)
-        return response.choices[0].message.content
+        if reply is None:
+            # fallback
+            response = self.client.chat.completions.create(
+                model=get_llm_model(),
+                temperature=LLM_TEMPERATURE,
+                messages=self.messages,
+            )
+            self.messages.append(response.choices[0].message)
+            reply = response.choices[0].message.content
+
+        # 自动记忆提取
+        auto_memory = self._extract_memory(user_input)
+        if auto_memory:
+            key, value = auto_memory
+            self.set_memory(key, value)
+            reply += f"\n\n💡 我注意到：{key} → {value}，已经记下了。"
+
+        return reply
 
     def _chat_with_tools(self):
         """OpenAI 官方 API，支持 function calling"""

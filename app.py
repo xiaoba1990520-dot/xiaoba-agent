@@ -1,5 +1,7 @@
 """「小八」- 文字型内容创作者智能体 - Streamlit PWA 对话界面"""
 
+from datetime import datetime
+
 import streamlit as st
 import streamlit.components.v1 as components
 from agent import BookBloggerAgent
@@ -32,6 +34,35 @@ if "agent" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+if "works" not in st.session_state:
+    st.session_state.works = []
+
+if "copy_notification" not in st.session_state:
+    st.session_state.copy_notification = None
+
+
+def copy_button(text: str, key: str):
+    """注入 HTML/JS 实现一键复制"""
+    safe_text = text.replace("`", "\\`").replace("$", "\\$")
+    components.html(
+        f"""
+        <button onclick="navigator.clipboard.writeText(`{safe_text}`);"
+                id="btn-{key}"
+                style="background:none;border:none;cursor:pointer;font-size:12px;color:#888;padding:0;margin-right:8px;">
+            📋 复制
+        </button>
+        <script>
+            document.getElementById('btn-{key}').addEventListener('click', function() {{
+                this.innerText = '✓ 已复制';
+                this.style.color = 'green';
+                setTimeout(() => {{ this.innerText = '📋 复制'; this.style.color = '#888'; }}, 2000);
+            }});
+        </script>
+        """,
+        height=25,
+        key=key,
+    )
+
 # 侧边栏
 with st.sidebar:
     st.title("📖 小八")
@@ -48,6 +79,30 @@ with st.sidebar:
     st.markdown("- **校对**：错别字、语病、流畅度")
     st.markdown("- **发布**：标题、标签、封面文案")
     st.markdown("- **找热点**：选题角度")
+
+    # 当前记忆
+    st.divider()
+    st.subheader("🧠 小八记得")
+    memory = st.session_state.agent.get_memory()
+    if memory:
+        for k, v in memory.items():
+            st.caption(f"**{k}**：{v}")
+    else:
+        st.caption("还没有记住什么…")
+    st.caption("💡 你可以说：记住：偏好作家 = 余华")
+
+    # 作品库
+    st.divider()
+    st.subheader("💾 作品库")
+    if st.session_state.works:
+        for idx, work in enumerate(st.session_state.works):
+            with st.expander(f"{work['time']} · {work['type']}"):
+                st.markdown(work["content"][:200] + "…" if len(work["content"]) > 200 else work["content"])
+                if st.button("🗑️ 删除", key=f"del_work_{idx}"):
+                    st.session_state.works.pop(idx)
+                    st.rerun()
+    else:
+        st.caption("还没有保存的作品")
 
     st.divider()
     if st.button("🔄 重置对话", use_container_width=True):
@@ -82,13 +137,25 @@ with col5:
 st.divider()
 
 # 显示对话历史
-for msg in st.session_state.chat_history:
+for i, msg in enumerate(st.session_state.chat_history):
     if msg["role"] == "user":
         with st.chat_message("user"):
             st.markdown(msg["content"])
     else:
         with st.chat_message("assistant"):
             st.markdown(msg["content"])
+            # 操作按钮
+            cols = st.columns([1, 1, 8])
+            with cols[0]:
+                copy_button(msg["content"], key=f"copy_{i}")
+            with cols[1]:
+                if st.button("💾", key=f"save_{i}", help="保存到作品库"):
+                    st.session_state.works.append({
+                        "content": msg["content"],
+                        "type": "对话",
+                        "time": datetime.now().strftime("%m-%d %H:%M"),
+                    })
+                    st.toast("已保存到作品库")
 
 # 输入区域
 def get_default_input():
@@ -112,7 +179,17 @@ if user_input or quick_msg:
     # 获取智能体回复
     with st.chat_message("assistant"):
         with st.spinner("小八正在思考..."):
-            reply = st.session_state.agent.chat(text)
+            try:
+                reply = st.session_state.agent.chat(text)
+            except Exception as e:
+                reply = (
+                    f"⚠️ 出错了：{str(e)}\n\n"
+                    "可能的原因：\n"
+                    "- 网络连接不稳定\n"
+                    "- API 暂时不可用\n"
+                    "- 请求内容过长\n\n"
+                    "请稍后再试，或换一种方式提问。"
+                )
         st.markdown(reply)
 
     st.session_state.chat_history.append({"role": "assistant", "content": reply})
