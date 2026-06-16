@@ -5,22 +5,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 尝试从 Streamlit secrets 读取配置
-try:
-    import streamlit as st
-    _secrets = st.secrets
-    _LLM_API_KEY = _secrets.get("llm", {}).get("api_key", "") or os.getenv("LLM_API_KEY", "")
-    _LLM_BASE_URL = _secrets.get("llm", {}).get("base_url", "") or os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
-    _LLM_MODEL = _secrets.get("llm", {}).get("model", "") or os.getenv("LLM_MODEL", "gpt-4o")
-except (ImportError, FileNotFoundError):
-    _LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-    _LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
-    _LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
+def _get(key: str, section: str = "llm", default: str = "") -> str:
+    """优先从 Streamlit Secrets 读取，其次从环境变量读取"""
+    try:
+        import streamlit as st
+        val = st.secrets.get(section, {}).get(key, "")
+        if val:
+            return val
+    except Exception:
+        pass
+    return os.getenv(key.upper(), default)
 
-# LLM 配置
-LLM_MODEL = _LLM_MODEL
-LLM_API_KEY = _LLM_API_KEY
-LLM_BASE_URL = _LLM_BASE_URL
+
+def get_llm_api_key() -> str:
+    return _get("api_key", default=os.getenv("LLM_API_KEY", ""))
+
+def get_llm_base_url() -> str:
+    return _get("base_url", default=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"))
+
+def get_llm_model() -> str:
+    return _get("model", default=os.getenv("LLM_MODEL", "gpt-4o"))
+
+
+# 兼容旧代码的静态变量（本地运行用）
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
 
 # 智能体人格标签

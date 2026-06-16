@@ -2,7 +2,7 @@
 
 from openai import OpenAI
 
-from agent.config import LLM_MODEL, LLM_API_KEY, LLM_BASE_URL, LLM_TEMPERATURE
+from agent.config import LLM_TEMPERATURE, get_llm_api_key, get_llm_base_url, get_llm_model
 from agent.persona import SYSTEM_PROMPT, REVIEW_DIMENSIONS
 
 
@@ -58,9 +58,9 @@ def review_script(
 ### 修改后参考版本
 （根据建议重写一版，保留原文的亮点，修复问题）"""
 
-    client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL)
+    client = OpenAI(api_key=get_llm_api_key(), base_url=get_llm_base_url())
     response = client.chat.completions.create(
-        model=LLM_MODEL,
+        model=get_llm_model(),
         temperature=0.5,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
