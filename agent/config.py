@@ -34,4 +34,4 @@ LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.7"))
 
 # 智能体人格标签
-PERSONA_TAGS = ["文学", "心理学", "情感细腻", "女性成长", "读书博主"]
+PERSONA_TAGS = ["文学", "心理学", "哲学", "文字创作", "情感细腻", "洞察"]

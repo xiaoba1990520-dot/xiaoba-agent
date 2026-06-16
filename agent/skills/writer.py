@@ -1,35 +1,35 @@
-"""写稿技能 - 根据版块类型和主题生成短视频文案"""
+"""写稿技能 - 根据版块类型、主题和输出格式生成内容"""
 
-import json
 from openai import OpenAI
 
 from agent.config import LLM_TEMPERATURE, get_llm_api_key, get_llm_base_url, get_llm_model
-from agent.persona import SYSTEM_PROMPT, WRITER_TEMPLATES
+from agent.persona import SYSTEM_PROMPT, WRITER_TEMPLATES, OUTPUT_FORMATS
 
 
 def write_script(
     topic: str,
     category: str = "文学书籍解读",
+    output_format: str = "视频口播文案",
     book_name: str = "",
-    target_duration: str = "1-2分钟",
     style_note: str = "",
 ) -> str:
     """
-    生成短视频口播文案
+    生成内容稿件
 
     Args:
         topic: 主题或核心观点
-        category: 版块类型，可选 "文学书籍解读" / "心理类感悟" / "女性成长感悟"
+        category: 版块类型，可选 "文学书籍解读" / "心理类感悟" / "哲学与生活"
+        output_format: 输出格式，可选 "视频口播文案" / "图文长文" / "金句卡片"
         book_name: 书名（可选）
-        target_duration: 目标时长，如 "1-2分钟"
         style_note: 风格补充说明（可选）
 
     Returns:
-        生成的口播文案
+        生成的内容
     """
     template = WRITER_TEMPLATES.get(category, WRITER_TEMPLATES["文学书籍解读"])
+    fmt = OUTPUT_FORMATS.get(output_format, OUTPUT_FORMATS["视频口播文案"])
 
-    prompt = f"""请以「小八」的身份，为以下需求写一篇短视频口播文案：
+    prompt = f"""请以「小八」的身份，为以下需求写一份内容：
 
 ## 版块类型
 {category}
@@ -39,8 +39,8 @@ def write_script(
 
 {"## 涉及书籍" + chr(10) + book_name if book_name else ""}
 
-## 目标时长
-{target_duration}
+## 输出格式
+{output_format} —— {fmt["description"]}
 
 ## 写作结构
 {chr(10).join(f"{i+1}. {s}" for i, s in enumerate(template["structure"]))}
@@ -48,15 +48,18 @@ def write_script(
 ## 语气基调
 {template["tone"]}
 
+## 格式要求
+{fmt["style_note"]}
+
 {"## 风格补充" + chr(10) + style_note if style_note else ""}
 
 ## 字数范围
-{template["word_range"][0]}-{template["word_range"][1]}字
+{fmt["word_range"][0]}-{fmt["word_range"][1]}字
 
 ## 要求
-- 直接输出文案内容，不要加标题、标签等格式
-- 保持「小八」的口语化风格，像在和朋友聊天
-- 结尾留一个开放式问题引发讨论
+- 直接输出内容，不要加多余的标题、标签等格式
+- 保持「小八」的独特风格：细腻、有洞察、不鸡汤
+- 结尾留一个开放式的问题或画面
 - 不要用"家人们""姐妹们"等称呼
 - 开头不要说"今天给大家推荐"
 """
@@ -79,30 +82,31 @@ WRITER_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "write_script",
-        "description": "根据主题和版块类型生成短视频口播文案。可选择的版块类型：文学书籍解读、心理类感悟、女性成长感悟。",
+        "description": "根据主题、版块类型和输出格式生成内容。支持三种输出格式：视频口播文案（适合抖音/视频号）、图文长文（适合公众号/小红书图文）、金句卡片（适合朋友圈/小红书）。",
         "parameters": {
             "type": "object",
             "properties": {
                 "topic": {
                     "type": "string",
-                    "description": "文案的主题或核心观点，如'余华《活着》中福贵的坚韧'",
+                    "description": "内容的主题或核心观点，如'余华《活着》中福贵的坚韧'",
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["文学书籍解读", "心理类感悟", "女性成长感悟"],
+                    "enum": ["文学书籍解读", "心理类感悟", "哲学与生活"],
                     "description": "内容版块类型",
+                },
+                "output_format": {
+                    "type": "string",
+                    "enum": ["视频口播文案", "图文长文", "金句卡片"],
+                    "description": "输出格式，默认视频口播文案",
                 },
                 "book_name": {
                     "type": "string",
                     "description": "涉及的书籍名称，可选",
                 },
-                "target_duration": {
-                    "type": "string",
-                    "description": "目标口播时长，如'1-2分钟'，默认1-2分钟",
-                },
                 "style_note": {
                     "type": "string",
-                    "description": "风格补充说明，如'更温柔一些'、'加入个人经历'，可选",
+                    "description": "风格补充说明，如'更温柔一些'、'以小见大'、'独特视角'，可选",
                 },
             },
             "required": ["topic", "category"],

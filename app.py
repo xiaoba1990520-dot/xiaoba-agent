@@ -39,7 +39,7 @@ with st.sidebar:
     st.divider()
 
     st.subheader("人格标签")
-    st.markdown("`文学` `心理学` `情感细腻` `女性成长` `读书博主`")
+    st.markdown("`文学` `心理学` `哲学` `文字创作` `情感细腻` `洞察`")
 
     st.divider()
     st.subheader("技能")

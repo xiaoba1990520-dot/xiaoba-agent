@@ -85,7 +85,7 @@ REVIEWER_TOOL_SCHEMA = {
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["文学书籍解读", "心理类感悟", "女性成长感悟"],
+                    "enum": ["文学书籍解读", "心理类感悟", "哲学与生活"],
                     "description": "内容版块类型",
                 },
                 "focus": {
