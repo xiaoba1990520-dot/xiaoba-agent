@@ -149,6 +149,57 @@ class BookBloggerAgent:
         except Exception:
             return None
 
+    def _summarize_old_history(self):
+        """当历史消息过长时，对早期消息做摘要并截断"""
+        system_msgs = [m for m in self.messages if m["role"] == "system"]
+        dialog_msgs = [m for m in self.messages if m["role"] != "system"]
+
+        MAX_HISTORY_MESSAGES = 20
+        SUMMARY_BATCH = 10
+
+        if len(dialog_msgs) <= MAX_HISTORY_MESSAGES:
+            return
+
+        to_summarize = dialog_msgs[:SUMMARY_BATCH]
+
+        summary_prompt = "请对以下对话进行简明摘要，保留核心信息：\n\n"
+        for m in to_summarize:
+            role = "用户" if m["role"] == "user" else "小八"
+            content = m.get("content", "")[:200]
+            summary_prompt += f"{role}：{content}\n"
+        summary_prompt += "\n请用1-2句话概括这段对话的核心内容和用户需求。"
+
+        try:
+            response = self.client.chat.completions.create(
+                model=get_llm_model(),
+                temperature=0.3,
+                messages=[
+                    {"role": "system", "content": "你是一位对话摘要助手。用简洁的语言概括对话核心。"},
+                    {"role": "user", "content": summary_prompt},
+                ],
+            )
+            summary = response.choices[0].message.content.strip()
+
+            # 更新 memory
+            existing = self.memory.get("对话概要", "")
+            self.memory["对话概要"] = (existing + "；" + summary) if existing else summary
+
+            # 截断历史：保留后面的
+            remaining = dialog_msgs[SUMMARY_BATCH:]
+            self.messages = system_msgs + remaining
+
+            # 同步更新 system message 内容（因为 memory 变了）
+            new_system = SYSTEM_PROMPT
+            if not self.supports_tools:
+                new_system += _build_tools_prompt()
+            new_system += _format_memory(self.memory)
+            self.messages[0] = {"role": "system", "content": new_system}
+
+        except Exception:
+            # 摘要失败时直接截断，保留最近的
+            remaining = dialog_msgs[-MAX_HISTORY_MESSAGES:]
+            self.messages = system_msgs + remaining
+
     def chat(self, user_input: str) -> str:
         """处理用户输入，支持记忆提取和多轮工具调用"""
         # 检查是否是记忆设置指令
@@ -196,6 +247,9 @@ class BookBloggerAgent:
             key, value = auto_memory
             self.set_memory(key, value)
             reply += f"\n\n💡 我注意到：{key} → {value}，已经记下了。"
+
+        # 历史截断与摘要
+        self._summarize_old_history()
 
         return reply
 
