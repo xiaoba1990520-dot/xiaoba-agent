@@ -9,7 +9,7 @@ from agent.persona import SYSTEM_PROMPT, WRITER_TEMPLATES, OUTPUT_FORMATS
 def write_script(
     topic: str,
     category: str = "文学与文字",
-    output_format: str = "视频口播文案",
+    output_format: str = "视频脚本",
     book_name: str = "",
     style_note: str = "",
 ) -> str:
@@ -19,7 +19,7 @@ def write_script(
     Args:
         topic: 主题或核心观点
         category: 版块类型，可选 "文学与文字" / "心理与情绪" / "哲学与思考"
-        output_format: 输出格式，可选 "视频口播文案" / "图文长文" / "金句卡片"
+        output_format: 输出格式，可选 "视频脚本" / "图文长文" / "金句卡片"
         book_name: 书名（可选）
         style_note: 风格补充说明（可选）
 
@@ -27,7 +27,7 @@ def write_script(
         生成的内容
     """
     template = WRITER_TEMPLATES.get(category, WRITER_TEMPLATES["文学与文字"])
-    fmt = OUTPUT_FORMATS.get(output_format, OUTPUT_FORMATS["视频口播文案"])
+    fmt = OUTPUT_FORMATS.get(output_format, OUTPUT_FORMATS["视频脚本"])
 
     prompt = f"""请以「小八」的身份，为以下需求写一份内容：
 
@@ -82,7 +82,7 @@ WRITER_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "write_script",
-        "description": "根据主题、版块类型和输出格式生成内容。支持三种输出格式：视频口播文案（适合抖音/视频号）、图文长文（适合公众号/小红书图文）、金句卡片（适合朋友圈/小红书）。",
+        "description": "根据主题、版块类型和输出格式生成内容。支持三种输出格式：视频脚本（口播/创意/分镜/剧情等，适合抖音/视频号/B站/小红书视频）、图文长文（适合公众号/小红书图文）、金句卡片（适合朋友圈/小红书）。",
         "parameters": {
             "type": "object",
             "properties": {
@@ -97,8 +97,8 @@ WRITER_TOOL_SCHEMA = {
                 },
                 "output_format": {
                     "type": "string",
-                    "enum": ["视频口播文案", "图文长文", "金句卡片"],
-                    "description": "输出格式，默认视频口播文案",
+                    "enum": ["视频脚本", "图文长文", "金句卡片"],
+                    "description": "输出格式，默认视频脚本",
                 },
                 "book_name": {
                     "type": "string",

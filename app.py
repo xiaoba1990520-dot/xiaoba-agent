@@ -43,7 +43,7 @@ with st.sidebar:
 
     st.divider()
     st.subheader("技能")
-    st.markdown("- **写稿**：生成口播/长文/金句")
+    st.markdown("- **写稿**：生成脚本/长文/金句")
     st.markdown("- **润稿**：内容质量优化")
     st.markdown("- **校对**：错别字、语病、流畅度")
     st.markdown("- **发布**：标题、标签、封面文案")
@@ -62,7 +62,7 @@ with st.sidebar:
 st.title("和小八聊聊")
 
 # 快捷操作按钮
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     if st.button("✍️ 写稿", use_container_width=True):
         st.session_state.quick_input = "帮我写一篇稿子"
@@ -73,6 +73,9 @@ with col3:
     if st.button("✓ 校对", use_container_width=True):
         st.session_state.quick_input = "帮我校对一段文字"
 with col4:
+    if st.button("📤 发布", use_container_width=True):
+        st.session_state.quick_input = "帮我生成发布配套"
+with col5:
     if st.button("🔥 热点", use_container_width=True):
         st.session_state.quick_input = "帮我找找热点"
 
