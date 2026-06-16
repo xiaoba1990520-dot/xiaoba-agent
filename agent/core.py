@@ -60,22 +60,64 @@ def _parse_tool_call(text: str):
     return None, None
 
 
+def _format_memory(memory: dict) -> str:
+    """将记忆格式化为 system prompt 附加文本"""
+    if not memory:
+        return ""
+    lines = ["\n## 关于这位创作者的记忆"]
+    for key, value in memory.items():
+        lines.append(f"- {key}：{value}")
+    lines.append("\n请基于以上记忆，在对话中自然地体现对创作者偏好的了解。")
+    return "\n".join(lines)
+
+
 class BookBloggerAgent:
-    """读书博主智能体「小八」"""
+    """文字型内容创作者智能体「小八」"""
 
     def __init__(self):
         self.client = OpenAI(api_key=get_llm_api_key(), base_url=get_llm_base_url())
         self.supports_tools = _supports_tools()
+        self.memory = {}  # 用户记忆系统
+        self._build_system_message()
 
+    def _build_system_message(self):
+        """构建包含记忆的 system message"""
         system_content = SYSTEM_PROMPT
         if not self.supports_tools:
             system_content += _build_tools_prompt()
-
+        system_content += _format_memory(self.memory)
         self.messages = [
             {"role": "system", "content": system_content},
         ]
 
+    def set_memory(self, key: str, value: str):
+        """设置用户记忆"""
+        self.memory[key] = value
+        # 重建 system message 以包含新记忆
+        self._build_system_message()
+
+    def get_memory(self) -> dict:
+        """获取当前记忆"""
+        return self.memory.copy()
+
     def chat(self, user_input: str) -> str:
+        """处理用户输入，支持记忆提取和多轮工具调用"""
+        # 检查是否是记忆设置指令
+        memory_match = re.match(r'^记住[：:](.+)$', user_input.strip())
+        if memory_match:
+            content = memory_match.group(1).strip()
+            # 尝试解析 "key = value" 格式
+            kv_match = re.match(r'(.+?)[=＝](.+)', content)
+            if kv_match:
+                key = kv_match.group(1).strip()
+                value = kv_match.group(2).strip()
+                self.set_memory(key, value)
+                return f"记住了：{key} → {value}\n\n当前记忆：\n" + "\n".join(f"- {k}：{v}" for k, v in self.memory.items())
+            else:
+                # 作为自由文本存储
+                self.set_memory("偏好", content)
+                return f"记住了：{content}\n\n当前记忆：\n" + "\n".join(f"- {k}：{v}" for k, v in self.memory.items())
+
         self.messages.append({"role": "user", "content": user_input})
 
         max_iterations = 5
@@ -166,13 +208,8 @@ class BookBloggerAgent:
         return content
 
     def reset(self):
-        """重置对话历史"""
-        system_content = SYSTEM_PROMPT
-        if not self.supports_tools:
-            system_content += _build_tools_prompt()
-        self.messages = [
-            {"role": "system", "content": system_content},
-        ]
+        """重置对话历史，但保留记忆"""
+        self._build_system_message()
 
     def get_history(self) -> list:
         return self.messages

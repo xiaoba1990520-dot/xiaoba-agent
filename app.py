@@ -44,9 +44,10 @@ with st.sidebar:
     st.divider()
     st.subheader("技能")
     st.markdown("- **写稿**：生成口播/长文/金句")
-    st.markdown("- **润稿**：内容维度审阅修改")
+    st.markdown("- **润稿**：内容质量优化")
     st.markdown("- **校对**：错别字、语病、流畅度")
-    st.markdown("- **找热点**：热点话题创作角度")
+    st.markdown("- **发布**：标题、标签、封面文案")
+    st.markdown("- **找热点**：选题角度")
 
     st.divider()
     if st.button("🔄 重置对话", use_container_width=True):
@@ -66,14 +67,14 @@ with col1:
     if st.button("✍️ 写稿", use_container_width=True):
         st.session_state.quick_input = "帮我写一篇稿子"
 with col2:
-    if st.button("🔍 审稿", use_container_width=True):
-        st.session_state.quick_input = "帮我审阅一篇文案"
+    if st.button("💎 润稿", use_container_width=True):
+        st.session_state.quick_input = "帮我润色一篇文案"
 with col3:
     if st.button("✓ 校对", use_container_width=True):
         st.session_state.quick_input = "帮我校对一段文字"
 with col4:
-    if st.button("🔥 找热点", use_container_width=True):
-        st.session_state.quick_input = "帮我找找最近可以写的内容角度"
+    if st.button("🔥 热点", use_container_width=True):
+        st.session_state.quick_input = "帮我找找热点"
 
 st.divider()
 
