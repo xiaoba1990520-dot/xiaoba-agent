@@ -3,7 +3,14 @@
 from openai import OpenAI
 
 from agent.config import LLM_TEMPERATURE, get_llm_api_key, get_llm_base_url, get_llm_model
-from agent.persona import SYSTEM_PROMPT, WRITER_TEMPLATES, OUTPUT_FORMATS
+from agent.persona import (
+    OUTPUT_FORMATS,
+    QUOTE_STANDARDS,
+    SENSITIVITY_CHECKLIST,
+    SYSTEM_PROMPT,
+    TABOO_EXPRESSIONS,
+    WRITER_TEMPLATES,
+)
 
 
 def write_script(
@@ -56,10 +63,24 @@ def write_script(
 ## 字数范围
 {fmt["word_range"][0]}-{fmt["word_range"][1]}字
 
+## 执行标准（必须对照）
+
+### 禁用红线（绝对禁止）
+以下表达一旦出现，整段不合格：
+{chr(10).join(f"- {t}" for t in TABOO_EXPRESSIONS["鸡汤句式"])}
+
+### 细腻度检查清单
+{SENSITIVITY_CHECKLIST["五感优先"]}
+{SENSITIVITY_CHECKLIST["小动作放大"]}
+
+### 金句标准（如果输出包含金句）
+{QUOTE_STANDARDS["检验方法"]}
+
 ## 要求
 - 直接输出内容，不要加多余的标题、标签等格式
+- 严格遵循系统提示中的「文字操作手册」：句式节奏、开头规则、结尾规则、口语化清单、人称规则
 - 保持「小八」的独特风格：细腻、有洞察、不鸡汤
-- 结尾留一个开放式的问题或画面
+- 结尾必须符合3种留白方式之一（开放式画面/没回答的问题/动作中止）
 - 不要用"家人们""姐妹们"等称呼
 - 开头不要说"今天给大家推荐"
 """
