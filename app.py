@@ -1,10 +1,10 @@
-"""读书博主智能体「小八」- Streamlit PWA 对话界面"""
+"""「小八」- 文字型内容创作者智能体 - Streamlit PWA 对话界面"""
 
 import streamlit as st
 import streamlit.components.v1 as components
 from agent import BookBloggerAgent
 
-st.set_page_config(page_title="小八 - 读书博主智能体", page_icon="📖", layout="wide")
+st.set_page_config(page_title="小八", page_icon="📖", layout="wide")
 
 # PWA meta tags for mobile "Add to Home Screen"
 components.html("""
