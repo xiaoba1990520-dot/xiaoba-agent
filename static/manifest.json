@@ -1,0 +1,22 @@
+{
+  "name": "小八 - 读书博主智能体",
+  "short_name": "小八",
+  "description": "短视频读书博主智能体，帮你写稿、审稿、找热点",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4a90d9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
