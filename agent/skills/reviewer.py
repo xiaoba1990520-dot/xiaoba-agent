@@ -75,7 +75,7 @@ REVIEWER_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "review_script",
-        "description": "审阅已有的短视频文案，从钩子力、节奏感、金句度、共鸣点、人格感、平台适配等维度给出评分和修改建议。",
+        "description": "润稿：对已有内容进行深度优化，从钩子力、节奏感、金句度、共鸣点、人格感、平台适配等维度给出评分和修改建议。",
         "parameters": {
             "type": "object",
             "properties": {

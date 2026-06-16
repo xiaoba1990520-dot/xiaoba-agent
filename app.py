@@ -44,7 +44,7 @@ with st.sidebar:
     st.divider()
     st.subheader("技能")
     st.markdown("- **写稿**：生成口播/长文/金句")
-    st.markdown("- **审稿**：内容维度审阅修改")
+    st.markdown("- **润稿**：内容维度审阅修改")
     st.markdown("- **校对**：错别字、语病、流畅度")
     st.markdown("- **找热点**：热点话题创作角度")
 
