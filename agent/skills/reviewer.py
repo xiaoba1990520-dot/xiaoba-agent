@@ -8,7 +8,7 @@ from agent.persona import SYSTEM_PROMPT, REVIEW_DIMENSIONS
 
 def review_script(
     content: str,
-    category: str = "文学书籍解读",
+    category: str = "文学与文字",
     focus: str = "",
 ) -> str:
     """
@@ -85,7 +85,7 @@ REVIEWER_TOOL_SCHEMA = {
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["文学书籍解读", "心理类感悟", "哲学与生活"],
+                    "enum": ["文学与文字", "心理与情绪", "哲学与思考"],
                     "description": "内容版块类型",
                 },
                 "focus": {

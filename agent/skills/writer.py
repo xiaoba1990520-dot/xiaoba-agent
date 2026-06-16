@@ -8,7 +8,7 @@ from agent.persona import SYSTEM_PROMPT, WRITER_TEMPLATES, OUTPUT_FORMATS
 
 def write_script(
     topic: str,
-    category: str = "文学书籍解读",
+    category: str = "文学与文字",
     output_format: str = "视频口播文案",
     book_name: str = "",
     style_note: str = "",
@@ -18,7 +18,7 @@ def write_script(
 
     Args:
         topic: 主题或核心观点
-        category: 版块类型，可选 "文学书籍解读" / "心理类感悟" / "哲学与生活"
+        category: 版块类型，可选 "文学与文字" / "心理与情绪" / "哲学与思考"
         output_format: 输出格式，可选 "视频口播文案" / "图文长文" / "金句卡片"
         book_name: 书名（可选）
         style_note: 风格补充说明（可选）
@@ -26,7 +26,7 @@ def write_script(
     Returns:
         生成的内容
     """
-    template = WRITER_TEMPLATES.get(category, WRITER_TEMPLATES["文学书籍解读"])
+    template = WRITER_TEMPLATES.get(category, WRITER_TEMPLATES["文学与文字"])
     fmt = OUTPUT_FORMATS.get(output_format, OUTPUT_FORMATS["视频口播文案"])
 
     prompt = f"""请以「小八」的身份，为以下需求写一份内容：
@@ -92,7 +92,7 @@ WRITER_TOOL_SCHEMA = {
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["文学书籍解读", "心理类感悟", "哲学与生活"],
+                    "enum": ["文学与文字", "心理与情绪", "哲学与思考"],
                     "description": "内容版块类型",
                 },
                 "output_format": {
