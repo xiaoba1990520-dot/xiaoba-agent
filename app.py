@@ -105,6 +105,41 @@ with st.sidebar:
     else:
         st.caption("还没有保存的作品")
 
+    # 数据导出/导入
+    st.divider()
+    st.subheader("📦 数据管理")
+
+    export_data = {
+        "works": st.session_state.works,
+        "chat_history": st.session_state.chat_history,
+        "memory": st.session_state.agent.get_memory(),
+        "exported_at": datetime.now().isoformat(),
+    }
+    export_json = json.dumps(export_data, ensure_ascii=False, indent=2)
+    st.download_button(
+        label="📥 导出全部数据",
+        data=export_json,
+        file_name=f"小八数据_{datetime.now().strftime('%m%d_%H%M')}.json",
+        mime="application/json",
+        use_container_width=True,
+    )
+
+    uploaded = st.file_uploader("📤 导入数据", type=["json"], label_visibility="collapsed")
+    if uploaded is not None:
+        try:
+            imported = json.loads(uploaded.read().decode("utf-8"))
+            if "works" in imported:
+                st.session_state.works = imported["works"]
+            if "chat_history" in imported:
+                st.session_state.chat_history = imported["chat_history"]
+            if "memory" in imported:
+                for k, v in imported["memory"].items():
+                    st.session_state.agent.set_memory(k, v)
+            st.toast("数据导入成功")
+            st.rerun()
+        except Exception as e:
+            st.error(f"导入失败：{str(e)}")
+
     st.divider()
     if st.button("🔄 重置对话", use_container_width=True):
         st.session_state.agent.reset()
