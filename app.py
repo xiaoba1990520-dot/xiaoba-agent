@@ -132,6 +132,7 @@ with st.sidebar:
                 st.session_state.works = imported["works"]
             if "chat_history" in imported:
                 st.session_state.chat_history = imported["chat_history"]
+                st.session_state.agent.restore_history(imported["chat_history"])
             if "memory" in imported:
                 for k, v in imported["memory"].items():
                     st.session_state.agent.set_memory(k, v)
@@ -229,3 +230,11 @@ if user_input or quick_msg:
         st.markdown(reply)
 
     st.session_state.chat_history.append({"role": "assistant", "content": reply})
+
+    # 如果模型内部发生了历史截断，同步界面上的 chat_history
+    if st.session_state.agent.history_trimmed:
+        st.session_state.chat_history = [
+            {"role": m["role"], "content": m.get("content", "")}
+            for m in st.session_state.agent.get_history()
+            if m["role"] in ("user", "assistant")
+        ]

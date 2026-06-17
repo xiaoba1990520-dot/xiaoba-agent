@@ -69,7 +69,7 @@ TRENDING_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "find_trending",
-        "description": "结合当前社会热点，找到与读书博主内容方向（文学/心理/女性成长）关联的创作角度。可指定热点话题或让AI自行联想。",
+        "description": "结合社会热点，找到与文字型内容创作者方向（文学/心理/哲学）关联的创作角度。可指定热点话题，或让小八基于知识储备联想相关议题。",
         "parameters": {
             "type": "object",
             "properties": {
@@ -85,6 +85,12 @@ TRENDING_TOOL_SCHEMA = {
                 "count": {
                     "type": "integer",
                     "description": "返回的角度数量，默认3",
+                },
+            },
+            "required": [],
+        },
+    },
+}
                 },
             },
             "required": [],

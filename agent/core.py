@@ -219,6 +219,7 @@ class BookBloggerAgent:
                 return f"记住了：{content}\n\n当前记忆：\n" + "\n".join(f"- {k}：{v}" for k, v in self.memory.items())
 
         self.messages.append({"role": "user", "content": user_input})
+        self.history_trimmed = False  # 重置截断标记
 
         max_iterations = 5
         reply = None
@@ -325,5 +326,18 @@ class BookBloggerAgent:
         """重置对话历史，但保留记忆"""
         self._build_system_message()
 
+    def restore_history(self, chat_history: list):
+        """从导入的数据恢复对话历史（保留 system message，重建对话消息）"""
+        # 保留 system message
+        system_msgs = [m for m in self.messages if m["role"] == "system"]
+        self.messages = system_msgs.copy()
+        # 追加导入的历史消息
+        for msg in chat_history:
+            self.messages.append(msg)
+
     def get_history(self) -> list:
+        return self.messages
+
+    def get_history(self) -> list:
+        return self.messages
         return self.messages
