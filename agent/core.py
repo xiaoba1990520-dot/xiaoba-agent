@@ -337,7 +337,3 @@ class BookBloggerAgent:
 
     def get_history(self) -> list:
         return self.messages
-
-    def get_history(self) -> list:
-        return self.messages
-        return self.messages

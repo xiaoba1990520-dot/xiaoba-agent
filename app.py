@@ -38,6 +38,9 @@ if "chat_history" not in st.session_state:
 if "works" not in st.session_state:
     st.session_state.works = []
 
+if "confirm_delete_work" not in st.session_state:
+    st.session_state.confirm_delete_work = None
+
 if "copy_notification" not in st.session_state:
     st.session_state.copy_notification = None
 
@@ -99,9 +102,22 @@ with st.sidebar:
         for idx, work in enumerate(st.session_state.works):
             with st.expander(f"{work['time']} · {work['type']}"):
                 st.markdown(work["content"][:200] + "…" if len(work["content"]) > 200 else work["content"])
-                if st.button("🗑️ 删除", key=f"del_work_{idx}"):
-                    st.session_state.works.pop(idx)
-                    st.rerun()
+                if st.session_state.confirm_delete_work == idx:
+                    st.warning("确认删除这篇作品？")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("确认删除", key=f"confirm_del_{idx}", type="primary"):
+                            st.session_state.works.pop(idx)
+                            st.session_state.confirm_delete_work = None
+                            st.rerun()
+                    with col2:
+                        if st.button("取消", key=f"cancel_del_{idx}"):
+                            st.session_state.confirm_delete_work = None
+                            st.rerun()
+                else:
+                    if st.button("🗑️ 删除", key=f"del_work_{idx}"):
+                        st.session_state.confirm_delete_work = idx
+                        st.rerun()
     else:
         st.caption("还没有保存的作品")
 

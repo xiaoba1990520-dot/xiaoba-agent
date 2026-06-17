@@ -25,7 +25,7 @@ def find_trending(
     angles_text = chr(10).join(f"- {a}" for a in TRENDING_ANGLES)
 
     topic_instruction = f"围绕热点话题「{topic}」，" if topic else "联想近期社会热点，"
-    category_instruction = f"聚焦「{category}」版块，" if category else "覆盖三大版块（文学与文字、心理与情绪、女性成长感悟），"
+    category_instruction = f"聚焦「{category}」版块，" if category else "覆盖三大版块（文学与文字、心理与情绪、哲学与思考），"
 
     prompt = f"""请以「小八」的视角，{topic_instruction}{category_instruction}找到至少{count}个可以创作短视频内容的角度。
 
@@ -38,7 +38,7 @@ def find_trending(
 
 ### 角度N：[吸引人的标题]
 - **关联热点**：与哪个热点话题关联
-- **版块归属**：文学与文字 / 心理与情绪 / 女性成长感悟
+- **版块归属**：文学与文字 / 心理与情绪 / 哲学与思考
 - **核心观点**：一句话概括你想表达什么
 - **推荐书籍**：1-2本可以引用的书
 - **开场钩子**：文案开头可以用什么钩子
@@ -91,9 +91,4 @@ TRENDING_TOOL_SCHEMA = {
         },
     },
 }
-                },
-            },
-            "required": [],
-        },
-    },
-}
+

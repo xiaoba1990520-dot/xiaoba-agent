@@ -3,7 +3,7 @@
 from openai import OpenAI
 
 from agent.config import LLM_TEMPERATURE, get_llm_api_key, get_llm_base_url, get_llm_model
-from agent.persona import SYSTEM_PROMPT
+from agent.persona import SYSTEM_PROMPT, TABOO_EXPRESSIONS, SENSITIVITY_CHECKLIST
 
 
 def proofread(content: str) -> str:
