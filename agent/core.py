@@ -239,8 +239,9 @@ class BookBloggerAgent:
                 temperature=LLM_TEMPERATURE,
                 messages=self.messages,
             )
-            self.messages.append(response.choices[0].message)
-            reply = response.choices[0].message.content
+            _msg = response.choices[0].message
+            self.messages.append({"role": _msg.role, "content": _msg.content or ""})
+            reply = _msg.content
 
         # 自动记忆提取
         auto_memory = self._extract_memory(user_input)
@@ -267,10 +268,10 @@ class BookBloggerAgent:
         msg = response.choices[0].message
 
         if not msg.tool_calls:
-            self.messages.append(msg)
+            self.messages.append({"role": msg.role, "content": msg.content or ""})
             return msg.content
 
-        self.messages.append(msg)
+        self.messages.append(msg.model_dump() if hasattr(msg, 'model_dump') else {"role": msg.role, "content": msg.content or "", "tool_calls": msg.tool_calls})
 
         for tool_call in msg.tool_calls:
             func_name = tool_call.function.name
@@ -319,7 +320,7 @@ class BookBloggerAgent:
             )
             return None
 
-        self.messages.append(msg)
+        self.messages.append({"role": msg.role, "content": content})
         return content
 
     def reset(self):
